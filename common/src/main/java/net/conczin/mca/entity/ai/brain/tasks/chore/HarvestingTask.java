@@ -8,12 +8,12 @@ import net.conczin.mca.util.InventoryUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BoneMealItem;
-import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -77,7 +77,7 @@ public class HarvestingTask extends AbstractChoreTask {
         super.start(world, villager, time);
 
         if (!villager.hasItemInSlot(villager.getDominantSlot())) {
-            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.getItem() instanceof HoeItem);
+            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.is(ItemTags.HOES));
             if (i == -1) {
                 abandonJobWithMessage("chore.harvesting.nohoe");
             } else {
@@ -91,10 +91,10 @@ public class HarvestingTask extends AbstractChoreTask {
         }
 
         // equip hoe
-        if (!InventoryUtils.contains(villager.getInventory(), HoeItem.class) && !villager.hasItemInSlot(villager.getDominantSlot())) {
+        if (!InventoryUtils.stream(villager.getInventory()).anyMatch(stack -> stack.is(ItemTags.HOES)) && !villager.hasItemInSlot(villager.getDominantSlot())) {
             abandonJobWithMessage("chore.harvesting.nohoe");
         } else if (!villager.hasItemInSlot(villager.getDominantSlot())) {
-            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.getItem() instanceof HoeItem);
+            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.is(ItemTags.HOES));
             ItemStack stack = villager.getInventory().getItem(i);
             villager.setItemInHand(villager.getDominantHand(), stack);
         }
@@ -175,7 +175,7 @@ public class HarvestingTask extends AbstractChoreTask {
         if (villager.distanceToSqr(Vec3.atBottomCenterOf(currentPos)) <= 6) {
             workingTick++;
             if (workingTick % 5 == 0) {
-                villager.swing(villager.getDominantHand());
+                villager.swingForAttack(villager.getDominantHand());
             }
             if (workingTick > 40) { //todo magic number
                 plantable.remove(currentPos);
@@ -243,8 +243,8 @@ public class HarvestingTask extends AbstractChoreTask {
 
         stack.ifPresentOrElse(s -> {
             world.setBlock(hitResult.getBlockPos(), ((BlockItem) s.getItem()).getBlock().defaultBlockState(), Block.UPDATE_ALL);
+            villager.swing(villager.getDominantHand(), s.getInteractAnimation());
             s.shrink(1);
-            villager.swing(villager.getDominantHand());
             bonemealable.add(target);
         }, () -> {
             getAssigningPlayer().ifPresent(p -> villager.sendChatMessage(p, "chore.harvesting.noseed"));
@@ -253,8 +253,12 @@ public class HarvestingTask extends AbstractChoreTask {
 
     @SuppressWarnings("deprecation")
     private void bonemealCrop(ServerLevel world, VillagerEntityMCA villager, BlockPos pos) {
-        if (swapItem(stack -> stack.getItem() instanceof BoneMealItem) == ITEM_READY && BoneMealItem.growCrop(villager.getItemBySlot(villager.getDominantSlot()), world, pos)) {
-            villager.swing(villager.getDominantHand());
+        if (swapItem(stack -> stack.getItem() instanceof BoneMealItem) == ITEM_READY) {
+            ItemStack boneMeal = villager.getItemBySlot(villager.getDominantSlot());
+            var animation = boneMeal.getInteractAnimation();
+            if (BoneMealItem.growCrop(boneMeal, world, pos)) {
+                villager.swing(villager.getDominantHand(), animation);
+            }
         }
     }
 

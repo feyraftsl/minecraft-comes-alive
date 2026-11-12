@@ -23,7 +23,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -114,13 +114,13 @@ public class InteractScreen extends AbstractDynamicScreen {
         super.mouseClicked(event, doubleClick);
 
         // Dialog
-        if (event.button() == 0 && dialogAnswerHover != null && dialogQuestionText != null) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && dialogAnswerHover != null && dialogQuestionText != null) {
             //todo double click (Likely fixable via using a different event -- 7.4.0)
             Network.sendToServer(new InteractionDialogueMessage(villager.asEntity().getUUID(), dialogQuestionId, dialogAnswerHover));
         }
 
         // Right mouse button
-        if (inGiftMode && event.button() == 1) {
+        if (inGiftMode && event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
             Network.sendToServer(new InteractionVillagerMessage("gift", villager.asEntity().getUUID()));
             return true;
         } else {
@@ -131,7 +131,7 @@ public class InteractScreen extends AbstractDynamicScreen {
     @Override
     public boolean keyPressed(KeyEvent event) {
         // Hotkey to leave gift mode
-        if (event.key() == GLFW.GLFW_KEY_ESCAPE) {
+        if (event.key() == InputConstants.KEY_ESCAPE) {
             if (inGiftMode) {
                 inGiftMode = false;
                 setLayout("interact");

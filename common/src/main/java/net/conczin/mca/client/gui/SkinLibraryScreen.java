@@ -1,5 +1,7 @@
 package net.conczin.mca.client.gui;
 
+import com.mojang.blaze3d.Blaze3D;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.conczin.mca.Config;
 import net.conczin.mca.MCA;
@@ -42,13 +44,11 @@ import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.util.Util;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -511,14 +511,14 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
     public boolean keyPressed(KeyEvent event) {
         int keyCode = event.key();
         // Pan
-        if (keyCode == GLFW.GLFW_KEY_SPACE && (textFieldWidget == null || !textFieldWidget.isFocused())) {
+        if (keyCode == InputConstants.KEY_SPACE && (textFieldWidget == null || !textFieldWidget.isFocused())) {
             isPanning = true;
             return true;
         }
 
         if (page == Page.EDITOR && (textFieldWidget == null || !textFieldWidget.isFocused())) {
             // Reset viewport
-            if (keyCode == GLFW.GLFW_KEY_R) {
+            if (keyCode == InputConstants.KEY_R) {
                 x0 = 0.0f;
                 x1 = 1.0f;
                 y0 = 0.0f;
@@ -527,19 +527,19 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
             }
 
             // Fill-delete
-            if (keyCode == GLFW.GLFW_KEY_F) {
+            if (keyCode == InputConstants.KEY_F) {
                 workspace.fillDelete((int) getPixelX(), (int) getPixelY());
                 return true;
             }
 
             // Undo
-            if (keyCode == GLFW.GLFW_KEY_Y || keyCode == GLFW.GLFW_KEY_Z) {
+            if (keyCode == InputConstants.KEY_Y || keyCode == InputConstants.KEY_Z) {
                 workspace.undo();
                 return true;
             }
 
             // Color pick
-            if (keyCode == GLFW.GLFW_KEY_P) {
+            if (keyCode == InputConstants.KEY_P) {
                 pickColor();
                 return true;
             }
@@ -550,7 +550,7 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
 
     @Override
     public boolean keyReleased(KeyEvent event) {
-        if (event.key() == GLFW.GLFW_KEY_SPACE) {
+        if (event.key() == InputConstants.KEY_SPACE) {
             isPanning = false;
         }
 
@@ -601,7 +601,7 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
         }
 
         if (page == Page.EDITOR) {
-            if (event.button() == 0 || event.button() == 1) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                 activeMouseButton = event.button();
 
                 int x = (int) getPixelX();
@@ -617,11 +617,11 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
 
                 lastPixelMouseX = x;
                 lastPixelMouseY = y;
-            } else if (event.button() == 2) {
+            } else if (event.button() == InputConstants.MOUSE_BUTTON_MIDDLE) {
                 isPanning = true;
             }
         } else {
-            if (hoveredContent != null) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && hoveredContent != null) {
                 if (previousScreen == null) {
                     focusedContent = hoveredContent;
                     setPage(Page.DETAIL);
@@ -655,7 +655,7 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
     public boolean mouseReleased(MouseButtonEvent event) {
         activeMouseButton = -1;
 
-        if (event.button() == 2) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_MIDDLE) {
             isPanning = false;
             if (!hasPanned && page == Page.EDITOR) {
                 pickColor();
@@ -677,10 +677,10 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
 
     private void paint(int x, int y) {
         if (page == SkinLibraryScreen.Page.EDITOR && workspace.validPixel(x, y)) {
-            if (activeMouseButton == 0) {
+            if (activeMouseButton == InputConstants.MOUSE_BUTTON_LEFT) {
                 workspace.currentImage.setPixel(x, y, color.getColor());
                 workspace.setDirty(true);
-            } else if (activeMouseButton == 1) {
+            } else if (activeMouseButton == InputConstants.MOUSE_BUTTON_RIGHT) {
                 workspace.currentImage.setPixel(x, y, 0);
                 workspace.setDirty(true);
             }
@@ -1477,7 +1477,7 @@ public class SkinLibraryScreen extends Screen implements SkinListUpdateListener 
 
     private void openHelp() {
         try {
-            Util.getPlatform().openUri(URI.create("https://github.com/Luke100000/minecraft-comes-alive/wiki/Skin-Editor"));
+            Blaze3D.openUri(URI.create("https://github.com/Luke100000/minecraft-comes-alive/wiki/Skin-Editor"));
         } catch (Exception e) {
             MCA.LOGGER.error(e);
         }

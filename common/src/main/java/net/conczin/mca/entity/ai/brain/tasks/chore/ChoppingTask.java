@@ -14,11 +14,11 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -55,7 +55,7 @@ public class ChoppingTask extends AbstractChoreTask {
         super.start(world, villager, time);
 
         if (!villager.hasItemInSlot(villager.getDominantSlot())) {
-            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.getItem() instanceof AxeItem);
+            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.is(ItemTags.AXES));
             if (i == -1) {
                 abandonJobWithMessage("chore.chopping.noaxe");
             } else {
@@ -68,10 +68,10 @@ public class ChoppingTask extends AbstractChoreTask {
     protected void tick(ServerLevel world, VillagerEntityMCA villager, long time) {
         if (this.villager == null) this.villager = villager;
 
-        if (!InventoryUtils.contains(villager.getInventory(), AxeItem.class) && !villager.hasItemInSlot(villager.getDominantSlot())) {
+        if (!InventoryUtils.stream(villager.getInventory()).anyMatch(stack -> stack.is(ItemTags.AXES)) && !villager.hasItemInSlot(villager.getDominantSlot())) {
             abandonJobWithMessage("chore.chopping.noaxe");
         } else if (!villager.hasItemInSlot(villager.getDominantSlot())) {
-            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.getItem() instanceof AxeItem);
+            int i = InventoryUtils.getFirstSlotContainingItem(villager.getInventory(), stack -> stack.is(ItemTags.AXES));
             ItemStack stack = villager.getInventory().getItem(i);
             villager.setItemInHand(villager.getDominantHand(), stack);
         }
@@ -104,7 +104,7 @@ public class ChoppingTask extends AbstractChoreTask {
 
         BlockState state = world.getBlockState(targetTree);
         if (state.is(BlockTags.LOGS)) {
-            villager.swing(villager.getDominantHand());
+            villager.swingForAttack(villager.getDominantHand());
             chopTicks++;
 
             // cut down a tree every few seconds, dependent on config + the mining speed multiplier

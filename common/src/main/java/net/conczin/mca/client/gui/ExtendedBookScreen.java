@@ -1,5 +1,7 @@
 package net.conczin.mca.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 import net.conczin.mca.client.book.Book;
 import net.conczin.mca.client.book.pages.Page;
 import net.conczin.mca.client.gui.widget.ExtendedPageTurnWidget;
@@ -100,11 +102,11 @@ public class ExtendedBookScreen extends Screen {
         }
 
         return switch (event.key()) {
-            case 266 -> {
+            case InputConstants.KEY_PAGEUP -> {
                 this.previousPageButton.onPress(event);
                 yield true;
             }
-            case 267 -> {
+            case InputConstants.KEY_PAGEDOWN -> {
                 this.nextPageButton.onPress(event);
                 yield true;
             }
@@ -142,7 +144,7 @@ public class ExtendedBookScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 0) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             Page page = book.getPage(pageIndex);
             if (page != null) {
                 ActiveTextCollector.ClickableStyleFinder finder = new ActiveTextCollector.ClickableStyleFinder(font, (int) event.x(), (int) event.y());

@@ -12,7 +12,7 @@ import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
+import com.mojang.blaze3d.Blaze3D;
 
 import java.net.URI;
 import java.util.EnumMap;
@@ -159,7 +159,7 @@ public class ChatAIContextScreen extends Screen {
 
     private void openHelp() {
         try {
-            Util.getPlatform().openUri(URI.create("https://github.com/Luke100000/minecraft-comes-alive/wiki/GPT3-based-conversations"));
+            Blaze3D.openUri(URI.create("https://github.com/Luke100000/minecraft-comes-alive/wiki/GPT3-based-conversations"));
         } catch (Exception e) {
             MCA.LOGGER.error("Unable to open ChatAI help", e);
         }
